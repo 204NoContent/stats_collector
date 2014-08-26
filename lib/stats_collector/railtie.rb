@@ -2,6 +2,12 @@ require 'stats_collector'
 
 module StatsCollector
   class Railtie < Rails::Railtie
+    class << self; attr_reader :git_info; end
+    @git_info = {
+      :branch => (File.exists?("BRANCH") ? File.read("BRANCH").chomp : 'Unknown'),
+      :revision => (File.exists?("REVISION") ? File.read("REVISION").chomp : 'Unknown'),
+    }
+
     initializer 'stats_collector' do |app|
       require 'stats_collector/http_client'
       self.class.subscribe_to_action_controller_notifications
@@ -17,9 +23,18 @@ module StatsCollector
         attr_reader :events
         attr_reader :customer
 
-        def initialize(env)
-          super
+        init = self.instance_method(:initialize)
+        define_method(:initialize) do |env|
+          init.bind(self).call(env)
           @events = []
+        end
+
+        old_headers = self.instance_method(:headers)
+        define_method(:headers) do
+          h = old_headers.bind(self).call
+          h['X-42Floors-Revision'] = StatsCollector::Railtie.git_info[:revision]
+          h['X-42Floors-Branch'] = StatsCollector::Railtie.git_info[:branch]
+          h
         end
 
         def track(name, options = {})
