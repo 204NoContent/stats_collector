@@ -53,6 +53,7 @@ module StatsCollector
           super
           session[:init] = true
           payload[:session_id] = session[:session_id] || session.id
+          payload[:controller_namespace] = self.to_s.deconstantize
           payload[:referrer_url] = request.referrer
           payload[:url] = request.original_url
           payload[:host] = request.host
@@ -74,6 +75,7 @@ module StatsCollector
           data = {
             app_name: Rails.application.class.parent_name,
             controller: payload[:controller],
+            controller_namespace: payload[:controller_namespace],
             action: payload[:action],
             url: payload[:url],
             full_path: payload[:path], # note: payload[:path] is set by defalt to be request.full_path
