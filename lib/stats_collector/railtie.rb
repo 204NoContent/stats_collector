@@ -82,7 +82,7 @@ module StatsCollector
             full_path: payload[:path], # note: payload[:path] is set by defalt to be request.full_path
             path: payload[:short_path],
             host: payload[:host],
-            params_id: payload[:params].try(:[], 'id'),
+            params: payload[:params],
             method: payload[:method],
             status_code: payload[:status],
             time: start.utc,
