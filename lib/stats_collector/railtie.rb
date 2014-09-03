@@ -53,7 +53,7 @@ module StatsCollector
           super
           session[:init] = true
           payload[:session_id] = session[:session_id] || session.id
-          namespace = self.to_s.deconstantize
+          namespace = self.class.to_s.deconstantize
           payload[:controller_namespace] = namespace.empty? ? 'None' : namespace
           payload[:referrer_url] = request.referrer
           payload[:url] = request.original_url
