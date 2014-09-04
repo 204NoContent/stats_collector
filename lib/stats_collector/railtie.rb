@@ -20,13 +20,13 @@ module StatsCollector
 
     def add_tracking
       ActionDispatch::Request.module_eval do
-        attr_reader :events
-        attr_reader :customer
+        attr_reader :events, :people
 
-        init = self.instance_method(:initialize)
+        old_initialize = self.instance_method(:initialize)
         define_method(:initialize) do |env|
-          init.bind(self).call(env)
+          old_initialize.bind(self).call(env)
           @events = []
+          @people = {}
         end
 
         old_headers = self.instance_method(:headers)
@@ -41,8 +41,8 @@ module StatsCollector
           @events << { name: name, options: options }
         end
 
-        def identify(customer)
-          @customer = customer
+        def identify(person, type = :user)
+          @people[type.downcase.to_sym] = person
         end
       end
     end
@@ -64,7 +64,7 @@ module StatsCollector
           payload[:branch] = request.headers['X-42Floors-Branch']
           payload[:server] = request.headers['X-42Floors-Server']
           payload[:events] = request.events
-          payload[:customer] = request.customer
+          payload[:people] = request.people
         rescue
         end
       end
@@ -96,7 +96,7 @@ module StatsCollector
             branch: payload[:branch],
             server: payload[:server],
             events: payload[:events],
-            customer: payload[:customer]
+            people: payload[:people]
           }
 
           StatsCollector::HttpClient.enqueue(data)
