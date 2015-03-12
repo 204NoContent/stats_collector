@@ -61,8 +61,8 @@ module StatsCollector
           payload[:short_path] = request.path
           payload[:ip] = request.headers['X-Forwarded-For'].try(:split, ',').try(:first)
           payload[:user_agent] = request.env["HTTP_USER_AGENT"]
-          payload[:branch] = request.headers['X-42Floors-Branch']
-          payload[:server] = request.headers['X-42Floors-Server']
+          payload[:branch] = request.headers['X-Test-Branch']
+          payload[:server] = request.headers['X-Test-Server']
           payload[:events] = request.events
           payload[:people] = request.people
         rescue
